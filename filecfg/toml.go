@@ -1,4 +1,4 @@
-package superutil
+package filecfg
 
 import (
 	"os"

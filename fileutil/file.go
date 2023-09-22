@@ -1,4 +1,4 @@
-package superutil
+package fileutil
 
 import (
 	"os"
