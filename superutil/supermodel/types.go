@@ -1,4 +1,4 @@
-package model
+package supermodel
 
 // State 地址状态
 type State string

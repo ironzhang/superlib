@@ -1,4 +1,4 @@
-package model
+package supermodel
 
 // ServiceModel 服务模型
 type ServiceModel struct {
