@@ -4,9 +4,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/ironzhang/superlib/filecfg"
-	"github.com/ironzhang/superlib/fileutil"
 	"github.com/ironzhang/tlog"
+
+	"github.com/ironzhang/superlib/fileutil"
 )
 
 // Parameter 配置参数
@@ -44,7 +44,7 @@ func readParameter() Parameter {
 
 	const path = "/etc/superdns.conf"
 	if fileutil.FileExist(path) {
-		err := filecfg.ReadTOML(path, &param)
+		err := fileutil.ReadTOML(path, &param)
 		if err != nil {
 			tlog.Errorw("read toml", "path", path, "error", err)
 		}
