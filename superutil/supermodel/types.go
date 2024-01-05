@@ -29,17 +29,8 @@ type Destination struct {
 	Percent float64 // 流量配比
 }
 
-// RouteRule 路由规则
-type RouteRule struct {
-	EnableScriptRoute       bool                     // 是否启用脚本路由
-	LidcDestinations        map[string][]Destination // 机房级默认路由目标
-	RegionDestinations      map[string][]Destination // 地域级默认路由目标
-	EnvironmentDestinations []Destination            // 环境级默认路由目标
-}
-
 // RouteStrategy 路由策略
 type RouteStrategy struct {
-	EnableScriptRoute   bool                 // 是否启用脚本路由
-	RouteRules          map[string]RouteRule // 路由规则，key 为环境名称
-	DefaultDestinations []Destination        // 默认路由目标
+	EnableScript        bool          // 是否启用脚本
+	DefaultDestinations []Destination // 默认路由目标
 }
