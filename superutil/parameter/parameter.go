@@ -52,9 +52,9 @@ func init() {
 func getDefaultResourcePath() string {
 	home, err := os.UserHomeDir()
 	if err == nil {
-		return path.Join(home, ".superdns")
+		return path.Join(home, ".superdns", "data")
 	}
-	return "/var/superdns"
+	return "/var/superdns/data"
 }
 
 func getDefaultParameter() Parameter {
