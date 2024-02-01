@@ -61,6 +61,7 @@ func getDefaultParameter() Parameter {
 	return Parameter{
 		Agent: Agent{
 			Server:            defaultAgentServer,
+			SkipError:         true,
 			Timeout:           defaultAgentTimeout,
 			KeepAliveInterval: defaultAgentKeepAliveInterval,
 			SubscribeTTL:      defaultAgentSubscribeTTL,
