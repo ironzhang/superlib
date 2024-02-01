@@ -14,8 +14,6 @@ const (
 	defaultAgentTimeout           = 2                // 2秒
 	defaultAgentKeepAliveInterval = 10 * 60          // 10分钟
 	defaultAgentSubscribeTTL      = 24 * 60 * 60     // 24小时
-	defaultAgentWaitForReady      = 200              // 200毫秒
-	defaultAgentPreloadForReady   = 1000             // 1000毫秒
 	defaultWatchInterval          = 1                // 1秒
 )
 
@@ -26,8 +24,6 @@ type Agent struct {
 	Timeout           int    // 接口调用超时，单位：秒
 	KeepAliveInterval int    // 保活间隔时间，单位：秒
 	SubscribeTTL      int    // 订阅存活时间，单位：秒
-	WaitForReady      int    // 等待就绪时间，单位：毫秒
-	PreloadForReady   int    // 预加载就绪时间，单位：毫秒
 }
 
 // Watch 订阅参数
@@ -65,8 +61,6 @@ func getDefaultParameter() Parameter {
 			Timeout:           defaultAgentTimeout,
 			KeepAliveInterval: defaultAgentKeepAliveInterval,
 			SubscribeTTL:      defaultAgentSubscribeTTL,
-			WaitForReady:      defaultAgentWaitForReady,
-			PreloadForReady:   defaultAgentPreloadForReady,
 		},
 		Watch: Watch{
 			ResourcePath:  getDefaultResourcePath(),
@@ -94,12 +88,6 @@ func readParameter() Parameter {
 	}
 	if param.Agent.SubscribeTTL < 3*param.Agent.KeepAliveInterval {
 		param.Agent.SubscribeTTL = 3 * param.Agent.KeepAliveInterval
-	}
-	if param.Agent.WaitForReady < 0 {
-		param.Agent.WaitForReady = defaultAgentWaitForReady
-	}
-	if param.Agent.PreloadForReady < 0 {
-		param.Agent.PreloadForReady = defaultAgentPreloadForReady
 	}
 	if param.Watch.WatchInterval <= 0 {
 		param.Watch.WatchInterval = defaultWatchInterval
