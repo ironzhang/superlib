@@ -12,8 +12,8 @@ import (
 const (
 	defaultAgentServer            = "127.0.0.1:1789" // 默认代理地址
 	defaultAgentTimeout           = 2                // 2秒
-	defaultAgentKeepAliveInterval = 10 * 60          // 10分钟
-	defaultAgentSubscribeTTL      = 24 * 60 * 60     // 24小时
+	defaultAgentKeepAliveInterval = 60               // 1分钟
+	defaultAgentSubscribeTTL      = 10 * 60          // 10分钟
 	defaultWatchInterval          = 1                // 1秒
 )
 
