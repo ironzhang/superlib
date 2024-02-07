@@ -2,7 +2,7 @@ package parameter
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/ironzhang/tlog"
 
@@ -12,7 +12,7 @@ import (
 const (
 	defaultAgentServer            = "127.0.0.1:1789" // 默认代理地址
 	defaultAgentTimeout           = 2                // 2秒
-	defaultAgentKeepAliveInterval = 60               // 1分钟
+	defaultAgentKeepAliveInterval = 10               // 10秒
 	defaultAgentSubscribeTTL      = 10 * 60          // 10分钟
 	defaultWatchInterval          = 1                // 1秒
 )
@@ -42,15 +42,19 @@ type Parameter struct {
 var Param Parameter
 
 func init() {
-	Param = readParameter()
+	Param = loadParameter()
+}
+
+func getSuperdnsPath() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "/var/superdns"
+	}
+	return filepath.Join(home, ".superdns")
 }
 
 func getDefaultResourcePath() string {
-	home, err := os.UserHomeDir()
-	if err == nil {
-		return path.Join(home, ".superdns", "resource")
-	}
-	return "/var/superdns/resource"
+	return filepath.Join(getSuperdnsPath(), "resource")
 }
 
 func getDefaultParameter() Parameter {
@@ -71,15 +75,21 @@ func getDefaultParameter() Parameter {
 
 func readParameter() Parameter {
 	param := getDefaultParameter()
-
-	const path = "/etc/superdns.conf"
-	if fileutil.FileExist(path) {
-		err := fileutil.ReadTOML(path, &param)
-		if err != nil {
-			tlog.Errorw("read toml", "path", path, "error", err)
+	paths := []string{"/etc/superdns.conf", filepath.Join(getSuperdnsPath(), "superdns.conf")}
+	for _, path := range paths {
+		if fileutil.FileExist(path) {
+			err := fileutil.ReadTOML(path, &param)
+			if err != nil {
+				tlog.Errorw("read toml", "path", path, "error", err)
+			}
+			return param
 		}
 	}
+	return param
+}
 
+func loadParameter() Parameter {
+	param := readParameter()
 	if param.Agent.Timeout < 0 {
 		param.Agent.Timeout = defaultAgentTimeout
 	}
@@ -92,6 +102,5 @@ func readParameter() Parameter {
 	if param.Watch.WatchInterval <= 0 {
 		param.Watch.WatchInterval = defaultWatchInterval
 	}
-
 	return param
 }
