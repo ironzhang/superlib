@@ -7,10 +7,13 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 
 	"github.com/ironzhang/superlib/codes"
 	"github.com/ironzhang/superlib/httputils"
+	"github.com/ironzhang/superlib/httputils/httpclient/resolver"
+	_ "github.com/ironzhang/superlib/httputils/httpclient/resolver/passthrough"
 )
 
 type InvokeInfo struct {
@@ -42,7 +45,21 @@ type Client struct {
 	Interceptors []Interceptor
 
 	once    sync.Once
+	target  resolver.Target
 	invoker Invoker
+}
+
+func makeTarget(addr string) resolver.Target {
+	results := strings.SplitN(addr, "/", 2)
+	if len(results) == 2 {
+		return resolver.Target{
+			Scheme:   results[0],
+			Endpoint: results[1],
+		}
+	}
+	return resolver.Target{
+		Endpoint: addr,
+	}
 }
 
 func (p *Client) init() {
@@ -55,6 +72,9 @@ func (p *Client) init() {
 	if p.ParseResult == nil {
 		p.ParseResult = defaultResultParser
 	}
+
+	// 构造目标地址
+	p.target = makeTarget(p.Addr)
 
 	// 构造拦截器调用链
 	invoker := p.call
@@ -98,13 +118,19 @@ func (p *Client) Invoke(ctx context.Context, method, path string, query url.Valu
 	// 初始化
 	p.once.Do(p.init)
 
+	// 解析地址
+	addr, err := resolver.Resolve(p.target)
+	if err != nil {
+		return fmt.Errorf("resolve: %w", err)
+	}
+
 	// 构造调用信息
 	if query == nil {
 		query = make(url.Values)
 	}
 	info := InvokeInfo{
 		Method: method,
-		Addr:   p.Addr,
+		Addr:   addr,
 		Path:   path,
 		Query:  query,
 		Header: make(http.Header),
