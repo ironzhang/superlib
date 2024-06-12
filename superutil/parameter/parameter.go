@@ -12,8 +12,8 @@ import (
 const (
 	defaultAgentServer            = "127.0.0.1:1789" // 默认代理地址
 	defaultAgentTimeout           = 2                // 2秒
+	defaultAgentKeepAliveTTL      = 10 * 60          // 10分钟
 	defaultAgentKeepAliveInterval = 10               // 10秒
-	defaultAgentSubscribeTTL      = 10 * 60          // 10分钟
 	defaultWatchInterval          = 1                // 1秒
 )
 
@@ -22,8 +22,8 @@ type Agent struct {
 	Server            string // 服务器地址
 	SkipError         bool   // 忽略接口调用错误
 	Timeout           int    // 接口调用超时，单位：秒
+	KeepAliveTTL      int    // 保活过期时间，单位：秒
 	KeepAliveInterval int    // 保活间隔时间，单位：秒
-	SubscribeTTL      int    // 订阅存活时间，单位：秒
 }
 
 // Watch 订阅参数
@@ -45,16 +45,16 @@ func init() {
 	Param = loadParameter()
 }
 
-func getSuperdnsPath() string {
+func getSuperNamePath() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return "/var/superdns"
+		return "/var/supername"
 	}
-	return filepath.Join(home, ".superdns")
+	return filepath.Join(home, ".supername")
 }
 
 func getDefaultResourcePath() string {
-	return filepath.Join(getSuperdnsPath(), "resource")
+	return filepath.Join(getSuperNamePath(), "resource")
 }
 
 func getDefaultParameter() Parameter {
@@ -63,8 +63,8 @@ func getDefaultParameter() Parameter {
 			Server:            defaultAgentServer,
 			SkipError:         true,
 			Timeout:           defaultAgentTimeout,
+			KeepAliveTTL:      defaultAgentKeepAliveTTL,
 			KeepAliveInterval: defaultAgentKeepAliveInterval,
-			SubscribeTTL:      defaultAgentSubscribeTTL,
 		},
 		Watch: Watch{
 			ResourcePath:  getDefaultResourcePath(),
@@ -75,7 +75,7 @@ func getDefaultParameter() Parameter {
 
 func readParameter() Parameter {
 	param := getDefaultParameter()
-	paths := []string{"/etc/superdns.conf", filepath.Join(getSuperdnsPath(), "superdns.conf")}
+	paths := []string{"/etc/supername.conf", filepath.Join(getSuperNamePath(), "supername.conf")}
 	for _, path := range paths {
 		if fileutil.FileExist(path) {
 			err := fileutil.ReadTOML(path, &param)
@@ -96,8 +96,8 @@ func loadParameter() Parameter {
 	if param.Agent.KeepAliveInterval <= 0 {
 		param.Agent.KeepAliveInterval = defaultAgentKeepAliveInterval
 	}
-	if param.Agent.SubscribeTTL < 3*param.Agent.KeepAliveInterval {
-		param.Agent.SubscribeTTL = 3 * param.Agent.KeepAliveInterval
+	if param.Agent.KeepAliveTTL < 3*param.Agent.KeepAliveInterval {
+		param.Agent.KeepAliveTTL = 3 * param.Agent.KeepAliveInterval
 	}
 	if param.Watch.WatchInterval <= 0 {
 		param.Watch.WatchInterval = defaultWatchInterval
