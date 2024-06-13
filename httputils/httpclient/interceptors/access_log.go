@@ -39,7 +39,7 @@ func (p *AccessLogInterceptorConfig) Interceptor(ctx context.Context, info *http
 }
 
 func (p *AccessLogInterceptorConfig) printRequest(ctx context.Context, log tlog.Logger, opts httpclient.AccessLogOptions, info *httpclient.InvokeInfo, args interface{}) {
-	log = log.WithContext(ctx).WithArgs("method", info.Method, "path", info.Path, "remote_addr", info.Addr, "query", info.Query, "header", info.Header)
+	log = log.WithContext(ctx).WithArgs("addr", info.Addr, "host", info.Host, "method", info.Method, "path", info.Path, "query", info.Query, "header", info.Header)
 	if opts.ClientMode == httputils.DisableAccessBody || p.DisableBody || args == nil {
 		log.Infof("http client request")
 	} else {
@@ -49,7 +49,7 @@ func (p *AccessLogInterceptorConfig) printRequest(ctx context.Context, log tlog.
 
 func (p *AccessLogInterceptorConfig) printResponse(ctx context.Context, log tlog.Logger, opts httpclient.AccessLogOptions, info *httpclient.InvokeInfo, reply interface{},
 	latency time.Duration, err error) {
-	log = log.WithContext(ctx).WithArgs("method", info.Method, "path", info.Path, "remote_addr", info.Addr, "latency", latency, "error", err)
+	log = log.WithContext(ctx).WithArgs("addr", info.Addr, "host", info.Host, "method", info.Method, "path", info.Path, "latency", latency, "error", err)
 	if opts.ClientMode == httputils.DisableAccessBody || p.DisableBody || reply == nil {
 		log.Infof("http client response")
 	} else {

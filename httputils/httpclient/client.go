@@ -7,18 +7,16 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"sync"
 
 	"github.com/ironzhang/superlib/codes"
 	"github.com/ironzhang/superlib/httputils"
-	"github.com/ironzhang/superlib/httputils/httpclient/resolver"
-	_ "github.com/ironzhang/superlib/httputils/httpclient/resolver/passthrough"
 )
 
 type InvokeInfo struct {
-	Method string
 	Addr   string
+	Method string
+	Host   string
 	Path   string
 	Query  url.Values
 	Header http.Header
@@ -31,6 +29,8 @@ type Interceptor func(ctx context.Context, info *InvokeInfo, args, reply interfa
 
 type ResultParser func(ctx context.Context, c *Client, resp *http.Response, reply interface{}) error
 
+type ResolveFunc func(ctx context.Context, addr string) (string, error)
+
 func makeInterceptorInvoker(i Interceptor, invoker Invoker) Invoker {
 	return func(ctx context.Context, info *InvokeInfo, args, reply interface{}) error {
 		return i(ctx, info, args, reply, invoker)
@@ -41,25 +41,12 @@ type Client struct {
 	Addr         string
 	Codec        Codec
 	Client       http.Client
+	Resolve      ResolveFunc
 	ParseResult  ResultParser
 	Interceptors []Interceptor
 
 	once    sync.Once
-	target  resolver.Target
 	invoker Invoker
-}
-
-func makeTarget(addr string) resolver.Target {
-	results := strings.SplitN(addr, "/", 2)
-	if len(results) == 2 {
-		return resolver.Target{
-			Scheme:   results[0],
-			Endpoint: results[1],
-		}
-	}
-	return resolver.Target{
-		Endpoint: addr,
-	}
 }
 
 func (p *Client) init() {
@@ -68,13 +55,15 @@ func (p *Client) init() {
 		p.Codec = JSONCodec{}
 	}
 
+	// 设置默认地址解析函数
+	if p.Resolve == nil {
+		p.Resolve = defaultResolve
+	}
+
 	// 设置默认结果解析函数
 	if p.ParseResult == nil {
 		p.ParseResult = defaultResultParser
 	}
-
-	// 构造目标地址
-	p.target = makeTarget(p.Addr)
 
 	// 构造拦截器调用链
 	invoker := p.call
@@ -101,6 +90,7 @@ func (p *Client) clone() *Client {
 		Addr:         p.Addr,
 		Codec:        p.Codec,
 		Client:       p.Client,
+		Resolve:      p.Resolve,
 		ParseResult:  p.ParseResult,
 		Interceptors: p.Interceptors,
 	}
@@ -119,7 +109,7 @@ func (p *Client) Invoke(ctx context.Context, method, path string, query url.Valu
 	p.once.Do(p.init)
 
 	// 解析地址
-	addr, err := resolver.Resolve(p.target)
+	host, err := p.Resolve(ctx, p.Addr)
 	if err != nil {
 		return fmt.Errorf("resolve: %w", err)
 	}
@@ -129,8 +119,9 @@ func (p *Client) Invoke(ctx context.Context, method, path string, query url.Valu
 		query = make(url.Values)
 	}
 	info := InvokeInfo{
+		Addr:   p.Addr,
 		Method: method,
-		Addr:   addr,
+		Host:   host,
 		Path:   path,
 		Query:  query,
 		Header: make(http.Header),
@@ -164,7 +155,7 @@ func (p *Client) call(ctx context.Context, info *InvokeInfo, args, reply interfa
 	}
 
 	// 构造 url
-	url := "http://" + info.Addr + normalizePath(info.Path)
+	url := "http://" + info.Host + normalizePath(info.Path)
 	if len(info.Query) > 0 {
 		url = url + "?" + info.Query.Encode()
 	}
@@ -191,6 +182,10 @@ func (p *Client) call(ctx context.Context, info *InvokeInfo, args, reply interfa
 
 	// 解析响应
 	return p.ParseResult(ctx, p, resp, reply)
+}
+
+func defaultResolve(ctx context.Context, addr string) (string, error) {
+	return addr, nil
 }
 
 func defaultResultParser(ctx context.Context, c *Client, resp *http.Response, reply interface{}) (err error) {
