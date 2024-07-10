@@ -57,6 +57,14 @@ func getDefaultResourcePath() string {
 	return filepath.Join(getSuperNamePath(), "resource")
 }
 
+func getUserSuperNameConfPath() string {
+	return filepath.Join(getSuperNamePath(), "supername.conf")
+}
+
+func getGlobalSuperNameConfPath() string {
+	return "/etc/supername.conf"
+}
+
 func getDefaultParameter() Parameter {
 	return Parameter{
 		Agent: Agent{
@@ -75,7 +83,7 @@ func getDefaultParameter() Parameter {
 
 func readParameter() Parameter {
 	param := getDefaultParameter()
-	paths := []string{"/etc/supername.conf", filepath.Join(getSuperNamePath(), "supername.conf")}
+	paths := []string{getGlobalSuperNameConfPath(), getUserSuperNameConfPath()}
 	for _, path := range paths {
 		if fileutil.FileExist(path) {
 			err := fileutil.ReadTOML(path, &param)
