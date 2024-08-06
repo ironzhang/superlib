@@ -19,7 +19,7 @@ type Endpoint struct {
 // Cluster 集群节点
 type Cluster struct {
 	Name      string            // 集群名
-	Features  map[string]string // 集群特征
+	Labels    map[string]string // 集群标签
 	Endpoints []Endpoint        // 地址节点列表
 }
 
