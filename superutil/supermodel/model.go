@@ -8,6 +8,6 @@ type ServiceModel struct {
 
 // RouteModel 路由模型
 type RouteModel struct {
-	Domain   string        // 域名
-	Strategy RouteStrategy // 路由策略
+	Domain string      // 域名
+	Policy RoutePolicy // 路由策略
 }

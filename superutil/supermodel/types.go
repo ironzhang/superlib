@@ -29,8 +29,8 @@ type Destination struct {
 	Percent float64 // 流量配比
 }
 
-// RouteStrategy 路由策略
-type RouteStrategy struct {
+// RoutePolicy 路由策略
+type RoutePolicy struct {
 	EnableScript        bool          // 是否启用脚本
 	DefaultDestinations []Destination // 默认路由目标
 }
