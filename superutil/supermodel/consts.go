@@ -1,7 +1,7 @@
 package supermodel
 
 const (
-	LidcKey = "X-Lidc"
+	ZoneKey = "X-Zone"
 	LaneKey = "X-Lane"
 	KindKey = "X-Kind"
 )
