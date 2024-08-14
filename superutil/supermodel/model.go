@@ -2,8 +2,9 @@ package supermodel
 
 // ServiceModel 服务模型
 type ServiceModel struct {
-	Domain   string    // 域名
-	Clusters []Cluster // 集群节点列表
+	Domain             string    // 域名
+	DefaultDestination string    // 默认路由目标
+	Clusters           []Cluster // 集群节点列表
 }
 
 // RouteModel 路由模型

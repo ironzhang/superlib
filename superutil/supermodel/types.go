@@ -31,6 +31,6 @@ type Destination struct {
 
 // RoutePolicy 路由策略
 type RoutePolicy struct {
-	EnableScript        bool          // 是否启用脚本
-	DefaultDestinations []Destination // 默认路由目标
+	EnableScript   bool            // 是否启用脚本
+	LabelSelectors []LabelSelector // 标签选择器列表
 }
