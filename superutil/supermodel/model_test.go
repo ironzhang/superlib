@@ -63,50 +63,6 @@ func TestWriteRouteModel(t *testing.T) {
 		Domain: "http.myapp",
 		Policy: RoutePolicy{
 			EnableScript: false,
-			LabelSelectors: []LabelSelector{
-				{
-					{
-						Not:      false,
-						Operator: Equals,
-						Left: Token{
-							Type:  Table,
-							Table: "labels",
-							Key:   ZoneKey,
-						},
-						Right: Token{
-							Type:  Table,
-							Table: "rctx",
-							Key:   ZoneKey,
-						},
-					},
-					{
-						Not:      false,
-						Operator: Equals,
-						Left: Token{
-							Type:  Table,
-							Table: "labels",
-							Key:   LaneKey,
-						},
-						Right: Token{
-							Type:   Const,
-							Consts: []string{"default"},
-						},
-					},
-					{
-						Not:      false,
-						Operator: Equals,
-						Left: Token{
-							Type:  Table,
-							Table: "labels",
-							Key:   KindKey,
-						},
-						Right: Token{
-							Type:   Const,
-							Consts: []string{"k8s"},
-						},
-					},
-				},
-			},
 		},
 	}
 	os.MkdirAll("./testdata/routes", os.ModePerm)

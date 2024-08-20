@@ -12,7 +12,7 @@ import (
 
 	"github.com/ironzhang/tlog/zaplog"
 
-	"github.com/ironzhang/superlib/logutil"
+	"github.com/ironzhang/superlib/ctxutil"
 )
 
 type AccessLogMiddlewareHandler struct {
@@ -44,7 +44,7 @@ func (p *AccessLogMiddlewareHandler) ReturnBadRequest(c echo.Context) (err error
 
 func TestAccessLogMiddleware(t *testing.T) {
 	//tlog.SetLogger(nil)
-	zaplog.StdContextHook = logutil.ContextHook
+	zaplog.StdContextHook = ctxutil.ContextHook
 
 	req1, err := http.NewRequest("GET", "/ok", nil)
 	if err != nil {
