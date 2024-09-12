@@ -61,8 +61,8 @@ func getUserSuperNameConfPath() string {
 	return filepath.Join(getSuperNamePath(), "supername.conf")
 }
 
-func getGlobalSuperNameConfPath() string {
-	return "/etc/supername.conf"
+func getSuperNameConfPaths() []string {
+	return []string{"/etc/supername.conf", "/var/supername/supername.conf", getUserSuperNameConfPath()}
 }
 
 func getDefaultParameter() Parameter {
@@ -83,7 +83,7 @@ func getDefaultParameter() Parameter {
 
 func readParameter() Parameter {
 	param := getDefaultParameter()
-	paths := []string{getGlobalSuperNameConfPath(), getUserSuperNameConfPath()}
+	paths := getSuperNameConfPaths()
 	for _, path := range paths {
 		if fileutil.FileExist(path) {
 			err := fileutil.ReadTOML(path, &param)
